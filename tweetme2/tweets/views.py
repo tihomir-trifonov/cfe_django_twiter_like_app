@@ -46,8 +46,9 @@ def tweet_detail_view (request, tweet_id, **kwargs):
     return Response(serializer.data)
 
 @api_view(['DELETE' , 'POST'])
+@permission_classes([IsAuthenticated])
 def tweet_delete_view (request, tweet_id, **kwargs):
-    qs = Tweet.objects.filter(id=tweet_id)
+    qs = Tweet.objects.filter(id=tweet_id) 
     if not qs.exists():
         return Response({}, status=404)
     qs = qs.filter(user=request.user)
@@ -55,7 +56,7 @@ def tweet_delete_view (request, tweet_id, **kwargs):
         return Response({"message":"You cannot delete this... mongo"}, status=403)
     obj = qs.first()
     obj.delete()
-    return Response({"message":"You deleted this... mongo"}, status=200)
+    return Response({"message":"Dis got deleted... mongo"}, status=200)
 
 
 def tweet_create_view_pure_django(request, *args, **kwargs):
