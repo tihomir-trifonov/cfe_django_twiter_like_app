@@ -4,6 +4,8 @@
         -> Image -> Media storage serer
     -> Deleting
     -> Retweeting
+        -> Read-only serializer
+        -> Write-only seruializer
     -> Liking / Disliking
 
 2. Users

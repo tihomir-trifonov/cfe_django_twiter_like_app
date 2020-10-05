@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
 from .models import Tweet
 from .forms import TweetForm
-from .serializers import TweetSerializer, TweetActionSerializer
+from .serializers import TweetSerializer, TweetActionSerializer, TweetCreateSerializer
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
@@ -22,7 +22,7 @@ def home_view(request, *args, **kwargs):
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def tweet_create_view(request, *args, **kwargs):
-    serializer = TweetSerializer(data=request.POST)
+    serializer = TweetCreateSerializer(data=request.POST)
     if serializer.is_valid(raise_exception = True):
         serializer.save(user=request.user) 
         return Response(serializer.data, status=201)
@@ -67,6 +67,8 @@ def tweet_action_view (request, *args, **kwargs):
         data = serializer.validated_data
         tweet_id = data.get("id")
         action = data.get("action")
+        content = data.get("content")
+
         qs = Tweet.objects.filter(id=tweet_id) 
         if not qs.exists():
             return Response({}, status=404)
@@ -75,11 +77,17 @@ def tweet_action_view (request, *args, **kwargs):
             obj.likes.add(request.user)
             serializer = TweetSerializer(obj)
             return Response(serializer.data, status=200)
-        elif aaction =="unlike":
+        elif action == 'unlike':
             obj.likes.remove(request.user)
+            serializer = TweetSerializer(obj)
+            return Response(serializer.data, status=200)
         elif action =="retweet":
-            #TODO- retweet
-            pass
+            new_tweet = Tweet.objects.create(
+                user=request.user,
+                parent = obj,
+                content=content)
+            serializer = TweetSerializer(new_tweet)
+            return Response(serializer.data, status=201)
     return Response({}, status=200)
 
 
@@ -89,7 +97,6 @@ def tweet_create_view_pure_django(request, *args, **kwargs):
         if request.is_ajax():
             return JsonResponse({}, status = 401)
         return redirect(settings.LOGIN_URL)
-    #print("Ajax ???" , request.is_ajax())
     form = TweetForm(request.POST or None)
     next_url = request.POST.get("next") or None
     if form.is_valid() :

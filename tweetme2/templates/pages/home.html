@@ -150,7 +150,7 @@ function loadTweets(tweetsElement) {
 loadTweets(tweetsContainerElement)
 
 
-function handleDidLike(tweet_id, currentCount, action) {
+function handleTweetActionBtn(tweet_id, currentCount, action) {
     console.log(tweet_id, currentCount, action)
     const url = "/api/tweets/action/"
     const method = "POST"
@@ -168,6 +168,7 @@ function handleDidLike(tweet_id, currentCount, action) {
 
     xhr.onload = function (){
         loadTweets(tweetsContainerElement)
+    
     }
 
     
@@ -178,13 +179,18 @@ function handleDidLike(tweet_id, currentCount, action) {
 
 }
 
+function RetweetBtn(tweet) {
+    return "<button class='btn btn-outline-success'onclick=handleTweetActionBtn("+tweet.id+","+tweet.likes+",'retweet')>Mongo Repost!</btn>"
+}
+
+
 function UnLikeBtn(tweet) {
-    return "<button class='btn btn-primary'onclick=handleDidLike("+tweet.id+","+tweet.likes+",'unlike')>Mongo Down!</btn>"
+    return "<button class='btn btn-outline-primary'onclick=handleTweetActionBtn("+tweet.id+","+tweet.likes+",'unlike')>Mongo Down!</btn>"
 }
 
 
 function LikeBtn(tweet) {
-    return "<button class='btn btn-primary'onclick=handleDidLike("+tweet.id+","+tweet.likes+",'like')>"+tweet.likes+" Mongo UPs!</btn>"
+    return "<button class='btn btn-primary'onclick=handleTweetActionBtn("+tweet.id+","+tweet.likes+",'like')>"+tweet.likes+" Mongo UPs!</btn>"
 }
 
 function formatTweetElement(tweet) {
@@ -194,7 +200,8 @@ function formatTweetElement(tweet) {
     "<p>"+tweet.content+" Mongo UPs: "+tweet.likes+
     '<p><div class="tn-group">'+
     LikeBtn(tweet) +
-    UnLikeBtn(tweet) +'</div></p>'+
+    UnLikeBtn(tweet) +
+    RetweetBtn(tweet) +'</div></p>'+
     "</p></div>"
     return formattedTweet
 }
